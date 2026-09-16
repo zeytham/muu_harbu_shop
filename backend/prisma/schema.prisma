@@ -351,4 +351,22 @@ model PurchaseOrderItem {
   createdAt       DateTime      @default(now())
 }
 
+// ================= SETTINGS DATABASE MODEL ================= //
+
+model StoreSetting {
+  id            String   @id @default("default")
+  shopName      String   @default("PhoneVault Pro Enterprise")
+  shopPhone     String   @default("+255 700 112 233")
+  shopEmail     String   @default("info@phonevault.tz")
+  shopAddress   String   @default("Kariakoo Commercial Complex, Dar es Salaam")
+  tinNumber     String   @default("123-456-789")
+  vrnNumber     String   @default("40-012345-X")
+  currency      String   @default("TSH")
+  exchangeRate  Float    @default(2650.0)
+  taxRate       Float    @default(18.0)
+  receiptHeader String   @default("Karibu PhoneVault Pro - Quality Guaranteed!")
+  receiptFooter String   @default("Asante kwa kununua nasi! Warranty Certificate Included.")
+  updatedAt     DateTime @updatedAt
+}
+
 

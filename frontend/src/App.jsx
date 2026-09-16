@@ -12,11 +12,22 @@ import UpgradeProgram from './components/Module3/UpgradeProgram';
 import WarrantyVault from './components/Module4/WarrantyVault';
 import FinancialAnalytics from './components/Module5/FinancialAnalytics';
 import RestockAndSupplierHub from './components/Module6/RestockAndSupplierHub';
+import StoreSettingsHub from './components/Settings/StoreSettingsHub';
+import LoginPortal from './components/Auth/LoginPortal';
+import LockScreenModal from './components/Auth/LockScreenModal';
 
 import { Smartphone, Package, ShieldCheck, AlertTriangle, Layers, DollarSign, ShoppingCart } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('pos'); // Default to POS Terminal!
+
+  // Auth & Session States
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('phonevault_user');
+    return saved ? JSON.parse(saved) : { id: 'demo-1', name: 'Store Owner', email: 'admin@phonevault.tz', role: 'ADMIN' };
+  });
+  const [isLocked, setIsLocked] = useState(false);
+  const [storeSettings, setStoreSettings] = useState(null);
 
   // Sidebar Layout States
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -49,8 +60,21 @@ export default function App() {
     setActiveTab('pos');
   };
 
+  const fetchStoreSettings = async () => {
+    try {
+      const res = await fetch('/api/settings');
+      const data = await res.json();
+      if (data.success) {
+        setStoreSettings(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const fetchAllData = async () => {
     setLoading(true);
+    fetchStoreSettings();
     try {
       const safeFetch = async (url) => {
         try {
@@ -84,6 +108,12 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('phonevault_token');
+    localStorage.removeItem('phonevault_user');
+    setCurrentUser(null);
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -110,8 +140,30 @@ export default function App() {
     return total;
   };
 
+  if (!currentUser) {
+    return (
+      <LoginPortal
+        storeSettings={storeSettings}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          fetchAllData();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen sky-page-bg text-slate-900 flex font-sans antialiased">
+      {/* Quick Lock Screen Modal */}
+      {isLocked && (
+        <LockScreenModal
+          currentUser={currentUser}
+          storeSettings={storeSettings}
+          onUnlock={() => setIsLocked(false)}
+          onLogout={handleLogout}
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -138,6 +190,11 @@ export default function App() {
           onOpenAddAccessory={() => setIsAddAccessoryOpen(true)}
           onRefresh={fetchAllData}
           loading={loading}
+          currentUser={currentUser}
+          storeSettings={storeSettings}
+          onLockScreen={() => setIsLocked(true)}
+          onOpenSettings={() => setActiveTab('settings')}
+          onLogout={handleLogout}
         />
 
         {/* Page Content */}
@@ -204,6 +261,13 @@ export default function App() {
                 initialVoucherValue={posTransferData?.voucherValue}
                 initialCustomer={posTransferData?.customer}
                 initialPhoneUnit={posTransferData?.targetPhoneUnit}
+              />
+            )}
+
+            {activeTab === 'settings' && (
+              <StoreSettingsHub
+                settings={storeSettings}
+                onRefreshSettings={fetchStoreSettings}
               />
             )}
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Package, ShieldCheck, AlertTriangle, ChevronLeft, ChevronRight, X, CheckCircle, ShoppingCart, Repeat, Award, DollarSign, TrendingUp } from 'lucide-react';
+import { Smartphone, Package, ShieldCheck, AlertTriangle, ChevronLeft, ChevronRight, X, CheckCircle, ShoppingCart, Repeat, Award, DollarSign, TrendingUp, Settings } from 'lucide-react';
 
 export default function Sidebar({
   activeTab,
@@ -63,6 +63,12 @@ export default function Sidebar({
       label: 'Compatibility Matcher',
       sublabel: 'Guaranteed Phone Fits',
       icon: ShieldCheck,
+    },
+    {
+      id: 'settings',
+      label: 'Store Settings',
+      sublabel: 'Branding, Security & Tax Setup',
+      icon: Settings,
     },
   ];
 
