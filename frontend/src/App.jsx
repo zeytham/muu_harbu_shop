@@ -52,21 +52,31 @@ export default function App() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
+      const safeFetch = async (url) => {
+        try {
+          const r = await fetch(url);
+          if (!r.ok) return { success: false, data: [] };
+          return await r.json();
+        } catch {
+          return { success: false, data: [] };
+        }
+      };
+
       const [resProd, resPhones, resCat, resBrands, resModels, resAlerts] = await Promise.all([
-        fetch('/api/products').then((r) => r.json()),
-        fetch('/api/phones/units').then((r) => r.json()),
-        fetch('/api/categories').then((r) => r.json()),
-        fetch('/api/categories/brands').then((r) => r.json()),
-        fetch('/api/categories/models').then((r) => r.json()),
-        fetch('/api/products/alerts/low-stock').then((r) => r.json()),
+        safeFetch('/api/products'),
+        safeFetch('/api/phones/units'),
+        safeFetch('/api/categories'),
+        safeFetch('/api/categories/brands'),
+        safeFetch('/api/categories/models'),
+        safeFetch('/api/products/alerts/low-stock'),
       ]);
 
-      if (resProd.success) setProducts(resProd.data);
-      if (resPhones.success) setPhoneUnits(resPhones.data);
-      if (resCat.success) setCategories(resCat.data);
-      if (resBrands.success) setBrands(resBrands.data);
-      if (resModels.success) setPhoneModels(resModels.data);
-      if (resAlerts.success) setAlerts(resAlerts.data);
+      if (resProd.success && Array.isArray(resProd.data)) setProducts(resProd.data);
+      if (resPhones.success && Array.isArray(resPhones.data)) setPhoneUnits(resPhones.data);
+      if (resCat.success && Array.isArray(resCat.data)) setCategories(resCat.data);
+      if (resBrands.success && Array.isArray(resBrands.data)) setBrands(resBrands.data);
+      if (resModels.success && Array.isArray(resModels.data)) setPhoneModels(resModels.data);
+      if (resAlerts.success && Array.isArray(resAlerts.data)) setAlerts(resAlerts.data);
     } catch (err) {
       console.error('Data loading error:', err);
     } finally {
