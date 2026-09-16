@@ -1,0 +1,354 @@
+// Prisma schema for Phone & Accessories Shop Management System - Module 1, 2 & 3
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  password  String
+  role      String      @default("CASHIER") // ADMIN, MANAGER, CASHIER, TECHNICIAN
+  pin       String      @default("1234")    // 4-digit PIN for manager discount overrides
+  active    Boolean     @default(true)
+  sales     Sale[]
+  shifts    CashShift[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  icon        String?
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Brand {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  logo        String?
+  products    Product[]
+  phoneModels PhoneModel[]
+  createdAt   DateTime     @default(now())
+}
+
+model PhoneModel {
+  id              String                 @id @default(uuid())
+  brandId         String
+  brand           Brand                  @relation(fields: [brandId], references: [id])
+  modelName       String                 // e.g. iPhone 15 Pro Max, Galaxy S24 Ultra
+  modelCode       String?
+  releaseYear     Int?
+  screenSize      String?
+  compatibilities ProductCompatibility[]
+  createdAt       DateTime               @default(now())
+}
+
+model Product {
+  id              String                 @id @default(uuid())
+  name            String                 // e.g. Anker 20W Charger, AirPods Pro 2, iPhone 15 Pro Max
+  type            String                 // PHONE, ACCESSORY, GADGET, SPARE_PART
+  categoryId      String
+  category        Category               @relation(fields: [categoryId], references: [id])
+  brandId         String?
+  brand           Brand?                 @relation(fields: [brandId], references: [id])
+  description     String?
+  imageUrls       String?                // JSON string array of images
+  hasVariants     Boolean                @default(false)
+  specifications  String?                // JSON string of specs (Wattage, mAh, Bluetooth, etc.)
+
+  // Single Product fields (Used if hasVariants = false)
+  basePrice       Float?
+  costPrice       Float?
+  stockQuantity   Int?                   @default(0)
+  barcode         String?                @unique
+  sku             String?                @unique
+  reorderLevel    Int?                   @default(5)
+
+  // Relations
+  variants           ProductVariant[]
+  phoneUnits         PhoneUnit[]            // If type = PHONE
+  compatibilities    ProductCompatibility[]
+  saleItems          SaleItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+}
+
+model ProductVariant {
+  id            String     @id @default(uuid())
+  productId     String
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String     @unique
+  barcode       String?    @unique
+  color         String?    // Space Grey, Alpine White, Clear, Matte Black
+  size          String?    // 10000mAh, 1.2m, 2.0m, 49mm, 6.7"
+  material      String?    // Silicone, Leather, Tempered Glass, GaN
+  style         String?    // MagSafe, Privacy Anti-Spy, Anime Skin
+  price         Float
+  costPrice     Float
+  stockQuantity Int        @default(0)
+  reorderLevel  Int        @default(3)
+  imageUrl      String?
+  saleItems     SaleItem[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model PhoneUnit {
+  id              String    @id @default(uuid())
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  imei1           String    @unique
+  imei2           String?   @unique
+  serialNumber    String?   @unique
+  condition       String    @default("NEW_SEALED") // NEW_SEALED, REFURBISHED, USED_LIKE_NEW, USED_GOOD, USED_FAIR
+  color           String
+  storage         String    // 128GB, 256GB, 512GB, 1TB
+  ram             String?   // 6GB, 8GB, 12GB
+  batteryHealth   Int?      // e.g. 98%
+  buyingPrice     Float
+  retailPrice     Float
+  minSellingPrice Float
+  status          String    @default("IN_STOCK") // IN_STOCK, RESERVED, SOLD, IN_REPAIR, RETURNED
+  warrantyMonths  Int       @default(12)
+  notes           String?
+  saleItem        SaleItem?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model ProductCompatibility {
+  id           String     @id @default(uuid())
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  phoneModelId String
+  phoneModel   PhoneModel @relation(fields: [phoneModelId], references: [id], onDelete: Cascade)
+  isUniversal  Boolean    @default(false)
+}
+
+// ================= MODULE 2 DATABASE MODELS ================= //
+
+model Customer {
+  id         String           @id @default(uuid())
+  name       String
+  phone      String           @unique
+  email      String?
+  tinNumber  String?
+  totalSpent Float            @default(0)
+  sales      Sale[]
+  vouchers   TradeInVoucher[]
+  createdAt  DateTime         @default(now())
+}
+
+model TradeInVoucher {
+  id          String    @id @default(uuid())
+  code        String    @unique // e.g. VOUCH-2026-8810
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  valueAmount Float
+  isRedeemed  Boolean   @default(false)
+  redeemedAt  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model CashShift {
+  id           String    @id @default(uuid())
+  cashierId    String
+  cashier      User      @relation(fields: [cashierId], references: [id])
+  openingFloat Float     // e.g. TSH 100,000
+  expectedCash Float?
+  actualCash   Float?
+  variance     Float?
+  status       String    @default("OPEN") // OPEN, CLOSED
+  openedAt     DateTime  @default(now())
+  closedAt     DateTime?
+  sales        Sale[]
+}
+
+model Sale {
+  id             String               @id @default(uuid())
+  invoiceNumber  String               @unique // e.g. INV-2026-00101
+  cashierId      String
+  cashier        User                 @relation(fields: [cashierId], references: [id])
+  shiftId        String?
+  shift          CashShift?           @relation(fields: [shiftId], references: [id])
+  customerId     String?
+  customer       Customer?            @relation(fields: [customerId], references: [id])
+  isProforma     Boolean              @default(false)
+  currency       String               @default("TSH") // TSH or USD
+  exchangeRate   Float                @default(1.0)
+  subtotal       Float
+  discountTotal  Float                @default(0)
+  discountReason String?
+  taxAmount      Float                @default(0)
+  grandTotal     Float
+  amountPaid     Float
+  changeDue      Float                @default(0)
+  status         String               @default("COMPLETED") // COMPLETED, PARKED, PARTIAL, REFUNDED
+  items          SaleItem[]
+  payments       PaymentTransaction[]
+  createdAt      DateTime             @default(now())
+}
+
+model SaleItem {
+  id          String          @id @default(uuid())
+  saleId      String
+  sale        Sale            @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id])
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  phoneUnitId String?         @unique
+  phoneUnit   PhoneUnit?      @relation(fields: [phoneUnitId], references: [id])
+  unitPrice   Float
+  quantity    Int             @default(1)
+  discount    Float           @default(0)
+  lineTotal   Float
+}
+
+model PaymentTransaction {
+  id            String   @id @default(uuid())
+  saleId        String
+  sale          Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  method        String   // CASH, MPESA, CARD, BANK_TRANSFER, INSTALLMENT, TRADEIN_VOUCHER
+  amount        Float
+  referenceCode String?  // e.g. M-Pesa Ref: QX89211029, Voucher Code
+  createdAt     DateTime @default(now())
+}
+
+// ================= MODULE 3 DATABASE MODELS ================= //
+
+model TradeInUpgrade {
+  id                 String   @id @default(uuid())
+  upgradeNumber      String   @unique // e.g. UPGRADE-2026-0048
+  customerName       String
+  customerPhone      String
+  nidaNumber         String   // Mandatory NIDA ID
+  signatureUrl       String?  // Digital signature data URL
+  
+  // Traded Device Details
+  oldBrandName       String   // e.g. Apple
+  oldModelName       String   // e.g. iPhone 13
+  oldImei1           String   @unique
+  oldImei2           String?
+  oldColor           String
+  oldStorage         String
+  batteryHealth      Int
+  hasCrackedScreen   Boolean  @default(false)
+  isFaceIdWorking    Boolean  @default(true)
+  isIcloudSignedOut  Boolean  @default(true)
+
+  // Allowance & Status
+  tradeUpAllowance   Float
+  status             String   @default("APPROVED_ELIGIBLE") // APPROVED_ELIGIBLE, REJECTED_CONDITION, COMPLETED_SWAP
+  rejectionReason    String?
+  voucherCode        String   @unique
+  isRedeemedInPos    Boolean  @default(false)
+  clearedToWholesale Boolean  @default(false)
+  createdAt          DateTime @default(now())
+}
+
+// ================= MODULE 4 DATABASE MODELS ================= //
+
+model WarrantyCertificate {
+  id              String   @id @default(uuid())
+  certificateCode String   @unique // e.g. WARR-2026-8812
+  saleId          String?
+  phoneUnitId     String?  @unique
+  customerName    String
+  customerPhone   String
+  imei1           String
+  modelName       String
+  warrantyMonths  Int      @default(12)
+  startDate       DateTime @default(now())
+  endDate         DateTime
+  status          String   @default("ACTIVE") // ACTIVE, EXPIRED, CLAIMED_RMA
+  createdAt       DateTime @default(now())
+}
+
+model SupplierRmaClaim {
+  id                String    @id @default(uuid())
+  rmaNumber         String    @unique // e.g. RMA-2026-0041
+  warrantyCode      String
+  customerName      String
+  customerPhone     String
+  defectiveImei     String
+  supplierName      String    // e.g. Apple East Africa, Samsung TZ, Authorized Distributor
+  faultDescription  String
+  status            String    @default("DEFECT_REPORTED") // DEFECT_REPORTED, SENT_TO_SUPPLIER, SWAP_APPROVED, NEW_UNIT_DELIVERED
+  replacementImei   String?
+  replacementModel  String?
+  dispatchedAt      DateTime  @default(now())
+  resolvedAt        DateTime?
+}
+
+// ================= MODULE 5 DATABASE MODELS ================= //
+
+model StoreExpense {
+  id          String   @id @default(uuid())
+  title       String   // e.g. Store Monthly Rent, LUKU Electricity Token
+  category    String   // RENT, UTILITIES, MARKETING, TRANSPORT, SUPPLIES, OTHER
+  amount      Float
+  paymentMode String   @default("CASH") // CASH, MPESA, BANK
+  notes       String?
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+// ================= MODULE 6 DATABASE MODELS ================= //
+
+model Supplier {
+  id             String          @id @default(uuid())
+  name           String          @unique // e.g. Apple Authorized TZ, Samsung East Africa, Anker Official
+  contactPerson  String?
+  phone          String
+  email          String?
+  address        String?
+  brandSupplied  String?         // e.g. Apple, Samsung, Anker, Baseus
+  leadTimeDays   Int             @default(3)
+  paymentTerms   String?         @default("NET_30") // CASH_ON_DELIVERY, NET_30, PREPAID
+  purchaseOrders PurchaseOrder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model PurchaseOrder {
+  id               String              @id @default(uuid())
+  poNumber         String              @unique // e.g. PO-2026-0089
+  supplierId       String
+  supplier         Supplier            @relation(fields: [supplierId], references: [id])
+  status           String              @default("DRAFT") // DRAFT, SENT_TO_SUPPLIER, IN_TRANSIT, DELIVERED_AND_RESTOCKED, CANCELLED
+  totalAmount      Float               @default(0)
+  notes            String?
+  expectedDelivery DateTime?
+  receivedAt       DateTime?
+  items            PurchaseOrderItem[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  variantId       String?
+  quantityOrdered Int
+  unitCost        Float
+  totalCost       Float
+  createdAt       DateTime      @default(now())
+}
+
+

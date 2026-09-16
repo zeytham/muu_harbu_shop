@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #e6f7ff;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .sky-page-bg {
+    background: linear-gradient(135deg, #e6f7ff 0%, #d8f3ff 50%, #e0f5ff 100%);
+  }
+  .sky-btn-main {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.35);
+    transition: all 0.2s ease-in-out;
+  }
+  .sky-btn-main:hover {
+    background-color: #0369a1;
+    box-shadow: 0 6px 20px 0 rgba(2, 132, 199, 0.45);
+    transform: translateY(-1px);
+  }
+  .sky-btn-accent {
+    background-color: #80ddff;
+    color: #090d16;
+    font-weight: 800;
+    box-shadow: 0 4px 14px 0 rgba(128, 221, 255, 0.4);
+    transition: all 0.2s ease-in-out;
+  }
+  .sky-btn-accent:hover {
+    background-color: #66d4ff;
+    transform: translateY(-1px);
+  }
+  .sky-card-white {
+    background-color: #ffffff;
+    border: 1px solid rgba(128, 221, 255, 0.4);
+    box-shadow: 0 4px 20px -2px rgba(2, 132, 199, 0.08);
+  }
+  .sky-badge {
+    background-color: rgba(128, 221, 255, 0.25);
+    color: #0369a1;
+    border: 1px solid rgba(2, 132, 199, 0.2);
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #e6f7ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #bae6fd;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}

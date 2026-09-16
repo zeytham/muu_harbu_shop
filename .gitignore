@@ -1,0 +1,22 @@
+# node_modules
+node_modules/
+**/node_modules/
+
+# build outputs
+dist/
+**/dist/
+
+# environment variables
+.env
+**/.env
+
+# Prisma SQLite database
+*.db
+*.db-journal
+prisma/dev.db
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
