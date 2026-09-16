@@ -369,4 +369,15 @@ model StoreSetting {
   updatedAt     DateTime @updatedAt
 }
 
+// ================= SMS LOGS DATABASE MODEL ================= //
+
+model SmsLog {
+  id          String   @id @default(uuid())
+  recipient   String   // e.g. +255 712 345 678
+  message     String   // SMS body text
+  type        String   @default("ALERT") // LOW_STOCK, POS_RECEIPT, WARRANTY_RMA, CUSTOM
+  status      String   @default("SENT") // SENT, DELIVERED, FAILED
+  sentAt      DateTime @default(now())
+}
+
 

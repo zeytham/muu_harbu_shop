@@ -185,6 +185,8 @@ export default function App() {
         <Header
           activeTab={activeTab}
           alerts={alerts}
+          products={products}
+          phoneUnits={phoneUnits}
           onOpenMobileNav={() => setIsMobileNavOpen(true)}
           onOpenAddPhone={() => setIsAddPhoneOpen(true)}
           onOpenAddAccessory={() => setIsAddAccessoryOpen(true)}
@@ -195,6 +197,7 @@ export default function App() {
           onLockScreen={() => setIsLocked(true)}
           onOpenSettings={() => setActiveTab('settings')}
           onLogout={handleLogout}
+          onSelectTab={(tab) => setActiveTab(tab)}
         />
 
         {/* Page Content */}
