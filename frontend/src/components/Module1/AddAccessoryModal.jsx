@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Package, Plus, Trash2, Shield, Zap } from 'lucide-react';
 
-export default function AddAccessoryModal({ categories, brands, onClose, onSuccess }) {
+export default function AddAccessoryModal({ categories = [], brands = [], onClose, onSuccess }) {
   const [name, setName] = useState('');
   const [type, setType] = useState('ACCESSORY'); // ACCESSORY, GADGET, SPARE_PART
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
@@ -23,6 +23,12 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
   const [barcode, setBarcode] = useState('');
   const [sku, setSku] = useState('');
 
+  // Inline Category / Brand creation state
+  const [showAddCat, setShowAddCat] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [showAddBrand, setShowAddBrand] = useState(false);
+  const [newBrandName, setNewBrandName] = useState('');
+
   // Variants Matrix fields
   const [variants, setVariants] = useState([
     { color: 'Black', size: 'Universal', price: '25000', costPrice: '12000', stockQuantity: '15', barcode: '', sku: '' },
@@ -31,6 +37,48 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
+
+  const handleCreateCategory = async () => {
+    if (!newCatName) return;
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCatName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMsg({ error: false, text: `Category '${newCatName}' imeongezwa kikamilifu!` });
+        setNewCatName('');
+        setShowAddCat(false);
+        await onSuccess();
+        if (data.data?.id) setCategoryId(data.data.id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleCreateBrand = async () => {
+    if (!newBrandName) return;
+    try {
+      const res = await fetch('/api/categories/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newBrandName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMsg({ error: false, text: `Brand '${newBrandName}' imeongezwa kikamilifu!` });
+        setNewBrandName('');
+        setShowAddBrand(false);
+        await onSuccess();
+        if (data.data?.id) setBrandId(data.data.id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleAddSpec = () => {
     if (specKey && specVal) {
@@ -68,6 +116,15 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
     setLoading(true);
     setMsg(null);
 
+    const activeCatId = categoryId || categories[0]?.id;
+    const activeBrandId = brandId || brands[0]?.id;
+
+    if (!activeCatId) {
+      setMsg({ error: true, text: 'Tafadhali chagua au ongeza Category kabla ya kuhifadhi.' });
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/products', {
         method: 'POST',
@@ -75,8 +132,8 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
         body: JSON.stringify({
           name,
           type,
-          categoryId,
-          brandId,
+          categoryId: activeCatId,
+          brandId: activeBrandId,
           description,
           hasVariants,
           specifications: specs,
@@ -94,10 +151,10 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
         onSuccess();
         onClose();
       } else {
-        setMsg({ error: true, text: json.message });
+        setMsg({ error: true, text: json.message || 'Imeshindikana kuhifadhi bidhaa' });
       }
     } catch (err) {
-      setMsg({ error: true, text: err.message });
+      setMsg({ error: true, text: err.message || 'Application failed' });
     } finally {
       setLoading(false);
     }
@@ -118,7 +175,7 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
         </div>
 
         {msg && (
-          <div className={`p-3 rounded-xl text-xs font-medium ${msg.error ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400'}`}>
+          <div className={`p-3 rounded-xl text-xs font-medium ${msg.error ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
             {msg.text}
           </div>
         )}
@@ -154,31 +211,98 @@ export default function AddAccessoryModal({ categories, brands, onClose, onSucce
           {/* Category & Brand Select */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-400 font-semibold mb-1">Category:</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-slate-400 font-semibold">Category:</label>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCat(!showAddCat)}
+                  className="text-[10px] font-bold text-cyan-400 hover:underline flex items-center gap-0.5"
+                >
+                  <Plus className="w-3 h-3" /> Add Category
+                </button>
+              </div>
+
+              {showAddCat ? (
+                <div className="flex gap-1.5 mb-2">
+                  <input
+                    type="text"
+                    placeholder="New Category Name"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    className="flex-1 bg-slate-950 border border-cyan-500 rounded-lg px-2 py-1 text-white text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateCategory}
+                    className="px-2.5 py-1 bg-cyan-500 text-slate-950 font-bold rounded-lg text-xs"
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : null}
+
               <select
-                value={categoryId}
+                value={categoryId || (categories[0]?.id || '')}
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
               >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {categories.length === 0 ? (
+                  <option value="">(Hakuna Category - Bonyeza "+ Add Category")</option>
+                ) : (
+                  categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
+
             <div>
-              <label className="block text-slate-400 font-semibold mb-1">Brand:</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-slate-400 font-semibold">Brand:</label>
+                <button
+                  type="button"
+                  onClick={() => setShowAddBrand(!showAddBrand)}
+                  className="text-[10px] font-bold text-cyan-400 hover:underline flex items-center gap-0.5"
+                >
+                  <Plus className="w-3 h-3" /> Add Brand
+                </button>
+              </div>
+
+              {showAddBrand ? (
+                <div className="flex gap-1.5 mb-2">
+                  <input
+                    type="text"
+                    placeholder="New Brand Name (e.g. Hoco, Joyroom)"
+                    value={newBrandName}
+                    onChange={(e) => setNewBrandName(e.target.value)}
+                    className="flex-1 bg-slate-950 border border-cyan-500 rounded-lg px-2 py-1 text-white text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateBrand}
+                    className="px-2.5 py-1 bg-cyan-500 text-slate-950 font-bold rounded-lg text-xs"
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : null}
+
               <select
-                value={brandId}
+                value={brandId || (brands[0]?.id || '')}
                 onChange={(e) => setBrandId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
               >
-                {brands.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
+                {brands.length === 0 ? (
+                  <option value="">(Hakuna Brand - Bonyeza "+ Add Brand")</option>
+                ) : (
+                  brands.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
           </div>

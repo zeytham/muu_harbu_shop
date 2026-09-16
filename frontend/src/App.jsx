@@ -327,6 +327,7 @@ export default function App() {
       {isAddPhoneOpen && (
         <AddPhoneModal
           products={products}
+          brands={brands}
           onClose={() => setIsAddPhoneOpen(false)}
           onSuccess={fetchAllData}
         />

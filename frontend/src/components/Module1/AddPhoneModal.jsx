@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { X, Smartphone, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Smartphone, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export default function AddPhoneModal({ products, onClose, onSuccess }) {
+export default function AddPhoneModal({ products = [], brands = [], onClose, onSuccess }) {
+  const phoneProducts = products.filter((p) => p.type === 'PHONE');
+
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [productId, setProductId] = useState(products[0]?.id || '');
+  const [productId, setProductId] = useState(phoneProducts[0]?.id || '');
   const [color, setColor] = useState('Natural Titanium');
   const [storage, setStorage] = useState('256GB');
   const [ram, setRam] = useState('8GB');
@@ -21,24 +23,93 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
   // Bulk mode
   const [bulkImeisText, setBulkImeisText] = useState('');
 
+  // Inline "Add New Model" toggle state
+  const [showAddModelForm, setShowAddModelForm] = useState(false);
+  const [newModelName, setNewModelName] = useState('');
+  const [newModelBrandId, setNewModelBrandId] = useState('');
+  const [addingModel, setAddingModel] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
+
+  // Handle Inline Creation of New Phone Model
+  const handleCreateNewModel = async (e) => {
+    e.preventDefault();
+    if (!newModelName) {
+      alert('Tafadhali ingiza Jina la Model (mfano: iPhone 16 Pro Max au Galaxy S25 Ultra)');
+      return;
+    }
+
+    setAddingModel(true);
+    try {
+      // Create brand if no brand selected yet
+      let selectedBrandId = newModelBrandId || brands[0]?.id;
+      if (!selectedBrandId) {
+        // Quick create default brand if list is empty
+        const bRes = await fetch('/api/categories/brands', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'Generic Brand' }),
+        });
+        const bData = await bRes.json();
+        if (bData.success) selectedBrandId = bData.data.id;
+      }
+
+      const res = await fetch('/api/categories/models', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          modelName: newModelName,
+          brandId: selectedBrandId,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setMsg({ error: false, text: `🎉 Model "${newModelName}" imeongezwa kikamilifu kwenye catalog!` });
+        setShowAddModelForm(false);
+        setNewModelName('');
+        // Trigger parent data refresh to reload products dropdown
+        await onSuccess();
+        if (json.data?.product?.id) {
+          setProductId(json.data.product.id);
+        }
+      } else {
+        setMsg({ error: true, text: json.message || 'Imeshindikana kuongeza model' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMsg({ error: true, text: err.message });
+    } finally {
+      setAddingModel(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMsg(null);
 
+    const activeProductId = productId || phoneProducts[0]?.id;
+
+    if (!activeProductId) {
+      setMsg({
+        error: true,
+        text: 'Hauna Smartphone Model iliyochaguliwa. Bonyeza "+ Add New Model" kuongeza model kwanza.',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isBulkMode) {
-        // Parse line by line or comma separated IMEIs
         const lines = bulkImeisText
           .split(/[\n,]/)
           .map((s) => s.trim())
           .filter(Boolean);
 
         if (lines.length === 0) {
-          setMsg({ error: true, text: 'Please enter at least one 15-digit IMEI number.' });
+          setMsg({ error: true, text: 'Tafadhali ingiza IMEI namba angalau moja (tarakimu 15).' });
           setLoading(false);
           return;
         }
@@ -47,7 +118,7 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId,
+            productId: activeProductId,
             color,
             storage,
             ram,
@@ -65,12 +136,11 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
           onSuccess();
           onClose();
         } else {
-          setMsg({ error: true, text: json.message });
+          setMsg({ error: true, text: json.message || 'Imeshindikana kuhifadhi simu' });
         }
       } else {
-        // Single import
         if (!imei1) {
-          setMsg({ error: true, text: 'IMEI 1 is required' });
+          setMsg({ error: true, text: 'IMEI 1 inahitajika (IMEI 1 is required)' });
           setLoading(false);
           return;
         }
@@ -79,7 +149,7 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId,
+            productId: activeProductId,
             imei1,
             imei2,
             serialNumber,
@@ -99,17 +169,15 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
           onSuccess();
           onClose();
         } else {
-          setMsg({ error: true, text: json.message });
+          setMsg({ error: true, text: json.message || 'Imeshindikana kuhifadhi simu' });
         }
       }
     } catch (err) {
-      setMsg({ error: true, text: err.message });
+      setMsg({ error: true, text: err.message || 'Application failed' });
     } finally {
       setLoading(false);
     }
   };
-
-  const phoneProducts = products.filter((p) => p.type === 'PHONE');
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
@@ -150,25 +218,100 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
         </div>
 
         {msg && (
-          <div className={`p-3 rounded-xl text-xs font-medium ${msg.error ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400'}`}>
+          <div
+            className={`p-3 rounded-xl text-xs font-medium ${
+              msg.error
+                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            }`}
+          >
             {msg.text}
           </div>
         )}
 
+        {/* Quick Add Model Form (Inline) */}
+        {showAddModelForm ? (
+          <div className="p-4 bg-slate-950 rounded-xl border border-cyan-500/50 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-cyan-300">
+                + Ongeza Smartphone Model Mpya (Add New Phone Model to Catalog)
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAddModelForm(false)}
+                className="text-xs text-slate-400 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Jina la Model (Model Name):</label>
+                <input
+                  type="text"
+                  placeholder="Mfano: iPhone 16 Pro Max, Galaxy S25 Ultra"
+                  value={newModelName}
+                  onChange={(e) => setNewModelName(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Brand:</label>
+                <select
+                  value={newModelBrandId}
+                  onChange={(e) => setNewModelBrandId(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-bold"
+                >
+                  {brands.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={addingModel}
+              onClick={handleCreateNewModel}
+              className="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black rounded-lg text-xs"
+            >
+              {addingModel ? 'Saving Model...' : 'Hifadhi Model Hii & Chagua'}
+            </button>
+          </div>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* Phone Model Select */}
           <div>
-            <label className="block text-slate-400 font-semibold mb-1">Select Smartphone Model:</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-slate-400 font-semibold">Select Smartphone Model:</label>
+              <button
+                type="button"
+                onClick={() => setShowAddModelForm(true)}
+                className="text-[11px] font-bold text-cyan-400 hover:underline flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Ongeza Model Mpya (Add New Model)
+              </button>
+            </div>
+
             <select
-              value={productId}
+              value={productId || (phoneProducts[0]?.id || '')}
               onChange={(e) => setProductId(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-medium focus:outline-none focus:border-cyan-500"
             >
-              {phoneProducts.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.brand?.name})
-                </option>
-              ))}
+              {phoneProducts.length === 0 ? (
+                <option value="">(Hakuna Model Iliyopo - Bonyeza "+ Ongeza Model Mpya" hapo juu)</option>
+              ) : (
+                phoneProducts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.brand?.name ? `(${p.brand.name})` : ''}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
@@ -245,7 +388,7 @@ export default function AddPhoneModal({ products, onClose, onSuccess }) {
                 Scan or Paste Multiple IMEIs (One per line):
               </label>
               <textarea
-                rows={5}
+                rows={4}
                 placeholder="358921104829101&#10;358921104829102&#10;358921104829103"
                 value={bulkImeisText}
                 onChange={(e) => setBulkImeisText(e.target.value)}

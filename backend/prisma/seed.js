@@ -6,6 +6,16 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting Database Seeding for Module 1...');
 
+  // Clean existing products and units for a fresh seed
+  await prisma.saleItem.deleteMany();
+  await prisma.phoneUnit.deleteMany();
+  await prisma.productVariant.deleteMany();
+  await prisma.productCompatibility.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.phoneModel.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.brand.deleteMany();
+
   // 1. Create Admin User
   const hashedPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
