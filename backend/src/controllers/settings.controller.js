@@ -14,7 +14,7 @@ const getOrCreateDefaultSettings = async () => {
       data: {
         id: 'default',
         shopName: 'PhoneVault Pro Enterprise',
-        shopPhone: '+255 700 112 233',
+        shopPhone: '+255 624 945 919',
         shopEmail: 'info@phonevault.tz',
         shopAddress: 'Kariakoo Commercial Complex, Dar es Salaam',
         tinNumber: '123-456-789',

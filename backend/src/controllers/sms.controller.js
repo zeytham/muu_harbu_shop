@@ -1,26 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-// Helper: Seed Default Demo SMS Logs if table is empty
+const TARGET_SMS_NUMBER = '+255 624 945 919';
+
+// Helper: Seed Default SMS Logs if table is empty
 const seedDefaultSmsLogs = async () => {
   const count = await prisma.smsLog.count();
   if (count === 0) {
     await prisma.smsLog.createMany({
       data: [
         {
-          recipient: '+255 700 112 233',
+          recipient: TARGET_SMS_NUMBER,
           message: '[ALERT] Low Stock Alert: iPhone 15 Pro Max 256GB is down to 2 units in stock. Reorder recommended.',
           type: 'LOW_STOCK',
           status: 'DELIVERED',
         },
         {
-          recipient: '+255 754 889 900',
+          recipient: TARGET_SMS_NUMBER,
           message: '[RECEIPT] PhoneVault Pro: Invoice #INV-2026-00102 paid TSH 3,200,000. Warranty Cert: WARR-2026-8812.',
           type: 'POS_RECEIPT',
           status: 'DELIVERED',
         },
         {
-          recipient: '+255 788 112 334',
+          recipient: TARGET_SMS_NUMBER,
           message: '[RMA UPDATE] PhoneVault Pro: Your brand-new replacement unit (RMA-2026-0041) has arrived from Apple East Africa!',
           type: 'WARRANTY_RMA',
           status: 'DELIVERED',
@@ -50,19 +52,21 @@ export const getSmsLogs = async (req, res) => {
 
 /**
  * POST /api/sms/send
- * Dispatch SMS Notification
+ * Dispatch SMS Notification (Defaults all dispatches to target owner number 0624945919)
  */
 export const sendSms = async (req, res) => {
   try {
     const { recipient, message, type = 'CUSTOM' } = req.body;
-    if (!recipient || !message) {
-      return res.status(400).json({ success: false, message: 'Recipient phone number and message text are required' });
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Message text is required' });
     }
+
+    const targetRecipient = recipient || TARGET_SMS_NUMBER;
 
     // Save SMS Log in DB
     const sms = await prisma.smsLog.create({
       data: {
-        recipient,
+        recipient: targetRecipient,
         message,
         type,
         status: 'DELIVERED',
@@ -71,7 +75,7 @@ export const sendSms = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: `SMS notification dispatched successfully to ${recipient}!`,
+      message: `SMS notification dispatched successfully to ${targetRecipient}!`,
       data: sms,
     });
   } catch (error) {

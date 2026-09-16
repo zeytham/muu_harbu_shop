@@ -4,7 +4,7 @@ import { X, Send, Smartphone, CheckCircle, Clock, MessageSquare, RefreshCw } fro
 export default function SmsNotificationModal({ onClose }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [recipient, setRecipient] = useState('+255 700 112 233');
+  const [recipient, setRecipient] = useState('0624945919');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
