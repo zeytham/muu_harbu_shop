@@ -10,65 +10,86 @@ export default function Sidebar({
   isMobileOpen,
   setIsMobileOpen,
 }) {
-  const navItems = [
+  const navSections = [
     {
-      id: 'pos',
-      label: 'Smart POS Terminal',
-      sublabel: 'Sales, Barcodes & Checkout',
-      icon: ShoppingCart,
-      badge: 'LIVE POS',
+      title: 'Sales & Operations',
+      items: [
+        {
+          id: 'pos',
+          label: 'Smart POS Terminal',
+          sublabel: 'Sales, Barcodes & Checkout',
+          icon: ShoppingCart,
+          badge: 'LIVE POS',
+        },
+      ],
     },
     {
-      id: 'financials',
-      label: 'Owner Financials & Audit',
-      sublabel: 'Profit, COGS & Daily Expenses',
-      icon: DollarSign,
-      badge: 'MODULE 5',
+      title: 'Inventory & Products',
+      items: [
+        {
+          id: 'phones',
+          label: 'Serialized Phones',
+          sublabel: 'IMEI Tracking & Warranty',
+          icon: Smartphone,
+        },
+        {
+          id: 'accessories',
+          label: 'Accessories & Gadgets',
+          sublabel: 'Covers, Chargers, AirPods',
+          icon: Package,
+        },
+        {
+          id: 'compatibility',
+          label: 'Compatibility Matcher',
+          sublabel: 'Guaranteed Phone Fits',
+          icon: ShieldCheck,
+        },
+      ],
     },
     {
-      id: 'forecasting',
-      label: 'Restock & Supplier Hub',
-      sublabel: 'AI Sales Velocity & PO Tracker',
-      icon: TrendingUp,
-      badge: 'MODULE 6',
+      title: 'Customer & Services',
+      items: [
+        {
+          id: 'upgrade',
+          label: 'Phone Upgrade Program',
+          sublabel: 'Trade-Up for Brand New Phones',
+          icon: Repeat,
+        },
+        {
+          id: 'warranties',
+          label: 'Digital Warranty & RMA',
+          sublabel: 'Supplier Swaps & Certificates',
+          icon: Award,
+        },
+      ],
     },
     {
-      id: 'upgrade',
-      label: 'Phone Upgrade Program',
-      sublabel: 'Trade-Up for Brand New Phones',
-      icon: Repeat,
-      badge: 'MODULE 3',
+      title: 'Financials & Supply',
+      items: [
+        {
+          id: 'financials',
+          label: 'Owner Financials & Audit',
+          sublabel: 'Profit, COGS & Daily Expenses',
+          icon: DollarSign,
+        },
+        {
+          id: 'forecasting',
+          label: 'Restock & Supplier Hub',
+          sublabel: 'AI Sales Velocity & PO Tracker',
+          icon: TrendingUp,
+        },
+      ],
     },
     {
-      id: 'warranties',
-      label: 'Digital Warranty & RMA',
-      sublabel: 'Supplier Swaps & Certificates',
-      icon: Award,
-      badge: 'MODULE 4',
-    },
-    {
-      id: 'phones',
-      label: 'Serialized Phones',
-      sublabel: 'IMEI Tracking & Warranty',
-      icon: Smartphone,
-    },
-    {
-      id: 'accessories',
-      label: 'Accessories & Gadgets',
-      sublabel: 'Covers, Chargers, AirPods',
-      icon: Package,
-    },
-    {
-      id: 'compatibility',
-      label: 'Compatibility Matcher',
-      sublabel: 'Guaranteed Phone Fits',
-      icon: ShieldCheck,
-    },
-    {
-      id: 'settings',
-      label: 'Store Settings',
-      sublabel: 'Branding, Security & Tax Setup',
-      icon: Settings,
+      title: 'System & Security',
+      items: [
+        {
+          id: 'settings',
+          label: 'Store Settings',
+          sublabel: 'Branding, Security & Tax Setup',
+          icon: Settings,
+        },
+      ],
     },
   ];
 
@@ -98,7 +119,7 @@ export default function Sidebar({
               {(!isCollapsed || isMobileOpen) && (
                 <div className="truncate">
                   <h1 className="text-sm font-black text-slate-900 tracking-tight truncate">PhoneVault Pro</h1>
-                  <p className="text-[10px] text-sky-700 font-bold tracking-wider uppercase">Enterprise Edition</p>
+                  <p className="text-[10px] text-sky-700 font-bold tracking-wider uppercase">Enterprise ERP</p>
                 </div>
               )}
             </div>
@@ -123,50 +144,60 @@ export default function Sidebar({
           </div>
 
           {/* Navigation Links Scrollable Area */}
-          <div className="p-3 space-y-1.5 overflow-y-auto flex-1 max-h-[calc(100vh-140px)]">
-            <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 ${isCollapsed && !isMobileOpen ? 'hidden' : 'block'}`}>
-              Main Modules
-            </div>
+          <div className="p-3 space-y-4 overflow-y-auto flex-1 max-h-[calc(100vh-140px)] scrollbar-thin">
+            {navSections.map((section, idx) => (
+              <div key={section.title || idx} className="space-y-1">
+                {(!isCollapsed || isMobileOpen) ? (
+                  <div className="px-3 pt-1 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100/60 mb-1 flex items-center justify-between">
+                    <span>{section.title}</span>
+                  </div>
+                ) : (
+                  idx > 0 && <div className="border-t border-slate-100 my-2" />
+                )}
 
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setIsMobileOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 sm:py-3 rounded-xl text-left transition-all ${
-                    isActive
-                      ? 'bg-[#0284c7] text-white font-extrabold shadow-md shadow-sky-600/30'
-                      : 'text-slate-700 hover:text-slate-950 hover:bg-sky-50 font-semibold'
-                  }`}
-                  title={item.label}
-                >
-                  <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-sky-700'}`} />
-                  {(!isCollapsed || isMobileOpen) && (
-                    <div className="truncate flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <div className="text-xs font-bold leading-tight truncate">{item.label}</div>
-                        {item.badge && (
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
-                            isActive ? 'bg-white text-sky-800' : 'bg-[#80ddff]/30 text-sky-950 border border-sky-300'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <div className={`text-[10px] truncate ${isActive ? 'text-sky-100' : 'text-slate-500'}`}>
-                        {item.sublabel}
-                      </div>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsMobileOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl text-left transition-all ${
+                        isActive
+                          ? 'bg-[#0284c7] text-white font-extrabold shadow-md shadow-sky-600/30'
+                          : 'text-slate-700 hover:text-slate-950 hover:bg-sky-50 font-semibold'
+                      }`}
+                      title={item.label}
+                    >
+                      <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-sky-700'}`} />
+                      {(!isCollapsed || isMobileOpen) && (
+                        <div className="truncate flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <div className="text-xs font-bold leading-tight truncate">{item.label}</div>
+                            {item.badge && (
+                              <span
+                                className={`text-[9px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
+                                  isActive ? 'bg-white text-sky-800' : 'bg-[#80ddff]/30 text-sky-950 border border-sky-300'
+                                }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                          <div className={`text-[10px] truncate ${isActive ? 'text-sky-100' : 'text-slate-500'}`}>
+                            {item.sublabel}
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
