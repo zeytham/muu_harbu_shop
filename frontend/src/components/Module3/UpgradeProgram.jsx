@@ -215,9 +215,15 @@ export default function UpgradeProgram({ products = [], phoneUnits = [], onTrans
     setSignatureSaved(false);
   };
 
+  // Selected Evaluation for Legal Contract tab
+  const [selectedEvalId, setSelectedEvalId] = useState('');
+
+  const activeContractEval = evalResult || evaluations.find(e => e.id === selectedEvalId) || evaluations[0] || null;
+
   const saveSignature = async () => {
-    if (!evalResult) {
-      alert('Please run a diagnostic evaluation first to generate an agreement record!');
+    const targetEval = activeContractEval;
+    if (!targetEval) {
+      alert('Tafadhali fanya kagua au chagua mteja kwenye orodha ya tathmini kuunda mkataba!');
       return;
     }
     const canvas = canvasRef.current;
@@ -228,17 +234,18 @@ export default function UpgradeProgram({ products = [], phoneUnits = [], onTrans
       const res = await fetch('/api/upgrades/contract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: evalResult.id, signatureUrl: dataUrl }),
+        body: JSON.stringify({ id: targetEval.id, signatureUrl: dataUrl }),
       });
       const json = await res.json();
       if (json.success) {
         setSignatureSaved(true);
-        alert('Digital Signature attached to Legal Contract PDF!');
+        alert('🎉 Saini ya Kidijitali (Digital Signature) imehifadhiwa kwenye Mkataba wa NIDA!');
       }
     } catch (e) {
       console.error(e);
     }
   };
+
 
   // Filter B2B Queue Table
   const filteredEvaluations = evaluations.filter(ev => {
@@ -265,9 +272,6 @@ export default function UpgradeProgram({ products = [], phoneUnits = [], onTrans
           <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
             Phone Upgrade & Trade-In Allowance Program
           </h2>
-          <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-            Grade-A customer trade-in diagnostic engine. Generates certified trade-up vouchers while maintaining a <span className="font-extrabold text-slate-900">100% Brand New Sealed</span> retail inventory floor.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -768,19 +772,40 @@ export default function UpgradeProgram({ products = [], phoneUnits = [], onTrans
 
             {/* Right Box: Printable Contract Preview */}
             <div id="legal-contract-document" className="p-4 sm:p-6 bg-sky-50/80 rounded-2xl border border-sky-200 font-sans text-xs text-slate-900 space-y-4 shadow-sm">
+              
+              {/* Select Evaluation Record Dropdown */}
+              {evaluations.length > 0 && (
+                <div className="bg-white p-2.5 rounded-xl border border-sky-300">
+                  <label className="text-[10px] font-extrabold text-sky-800 uppercase tracking-wider block mb-1">
+                    Chagua Mteja / Evaluation (Select Customer Evaluation):
+                  </label>
+                  <select
+                    value={selectedEvalId || activeContractEval?.id || ''}
+                    onChange={(e) => setSelectedEvalId(e.target.value)}
+                    className="w-full bg-sky-50 border border-sky-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none"
+                  >
+                    {evaluations.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.customerName} ({ev.oldBrandName} {ev.oldModelName} - IMEI: {ev.oldImei1}) - TSH {ev.tradeUpAllowance?.toLocaleString()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="text-center border-b border-slate-300 pb-3 space-y-1">
                 <div className="text-sm font-black uppercase tracking-wide">LEGAL OWNERSHIP TRANSFER AGREEMENT</div>
                 <div className="text-[11px] font-bold text-sky-800">PhoneVault Pro Enterprise • Security Audit</div>
-                <div className="text-[10px] text-slate-500">Document ID: {evalResult?.upgradeNumber || 'UPGRADE-2026-REF'}</div>
+                <div className="text-[10px] text-slate-500">Document ID: {activeContractEval?.upgradeNumber || 'UPGRADE-2026-REF'}</div>
               </div>
 
               <div className="space-y-2 text-[11px]">
-                <div className="flex justify-between"><span className="font-bold text-slate-600">Customer Name:</span> <span className="font-extrabold text-slate-900">{customerName}</span></div>
-                <div className="flex justify-between"><span className="font-bold text-slate-600">NIDA Number:</span> <span className="font-mono font-bold text-slate-900">{nidaNumber}</span></div>
-                <div className="flex justify-between"><span className="font-bold text-slate-600">Phone Number:</span> <span className="font-semibold text-slate-900">{customerPhone}</span></div>
-                <div className="flex justify-between border-t border-sky-200 pt-2"><span className="font-bold text-slate-600">Traded Phone:</span> <span className="font-extrabold text-slate-900">{oldBrandName} {oldModelName} ({oldStorage})</span></div>
-                <div className="flex justify-between"><span className="font-bold text-slate-600">IMEI 1 Code:</span> <span className="font-mono text-sky-800 font-bold">{oldImei1}</span></div>
-                <div className="flex justify-between"><span className="font-bold text-slate-600">Allowance Value:</span> <span className="font-black text-emerald-700">TSH {evalResult?.tradeUpAllowance?.toLocaleString() || '900,000'}</span></div>
+                <div className="flex justify-between"><span className="font-bold text-slate-600">Customer Name:</span> <span className="font-extrabold text-slate-900">{activeContractEval?.customerName || customerName}</span></div>
+                <div className="flex justify-between"><span className="font-bold text-slate-600">NIDA Number:</span> <span className="font-mono font-bold text-slate-900">{activeContractEval?.nidaNumber || nidaNumber}</span></div>
+                <div className="flex justify-between"><span className="font-bold text-slate-600">Phone Number:</span> <span className="font-semibold text-slate-900">{activeContractEval?.customerPhone || customerPhone}</span></div>
+                <div className="flex justify-between border-t border-sky-200 pt-2"><span className="font-bold text-slate-600">Traded Phone:</span> <span className="font-extrabold text-slate-900">{activeContractEval?.oldBrandName || oldBrandName} {activeContractEval?.oldModelName || oldModelName} ({activeContractEval?.oldStorage || oldStorage})</span></div>
+                <div className="flex justify-between"><span className="font-bold text-slate-600">IMEI 1 Code:</span> <span className="font-mono text-sky-800 font-bold">{activeContractEval?.oldImei1 || oldImei1}</span></div>
+                <div className="flex justify-between"><span className="font-bold text-slate-600">Allowance Value:</span> <span className="font-black text-emerald-700">TSH {(activeContractEval?.tradeUpAllowance || estimatedAllowance || 900000).toLocaleString()}</span></div>
               </div>
 
               <div className="p-3 bg-white rounded-xl border border-sky-200 text-[10px] text-slate-600 leading-relaxed">
@@ -798,6 +823,7 @@ export default function UpgradeProgram({ products = [], phoneUnits = [], onTrans
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}

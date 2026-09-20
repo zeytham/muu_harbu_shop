@@ -106,9 +106,6 @@ export default function FinancialAnalytics() {
           <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
             Personal Owner Financial Profitability, Expense Tracker & Audit Engine
           </h2>
-          <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-            Real-time Profitability & Cost of Goods Sold (COGS) audit engine. Track Gross Profit, store operating expenses (Rent, LUKU, Internet, Transport) and End-of-Day financial settlements.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

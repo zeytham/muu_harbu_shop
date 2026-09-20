@@ -8,13 +8,16 @@ import CompatibilityFinder from './components/Module1/CompatibilityFinder';
 import BarcodePrinterModal from './components/Module1/BarcodePrinterModal';
 import AddPhoneModal from './components/Module1/AddPhoneModal';
 import AddAccessoryModal from './components/Module1/AddAccessoryModal';
+import CategoryBrandManagerModal from './components/Module1/CategoryBrandManagerModal';
 import UpgradeProgram from './components/Module3/UpgradeProgram';
 import WarrantyVault from './components/Module4/WarrantyVault';
 import FinancialAnalytics from './components/Module5/FinancialAnalytics';
 import RestockAndSupplierHub from './components/Module6/RestockAndSupplierHub';
 import StoreSettingsHub from './components/Settings/StoreSettingsHub';
+import CustomerCrmHub from './components/Module8/CustomerCrmHub';
 import LoginPortal from './components/Auth/LoginPortal';
 import LockScreenModal from './components/Auth/LockScreenModal';
+
 
 import { Smartphone, Package, ShieldCheck, AlertTriangle, Layers, DollarSign, ShoppingCart } from 'lucide-react';
 
@@ -48,7 +51,9 @@ export default function App() {
   // Modals
   const [isAddPhoneOpen, setIsAddPhoneOpen] = useState(false);
   const [isAddAccessoryOpen, setIsAddAccessoryOpen] = useState(false);
+  const [isCatBrandManagerOpen, setIsCatBrandManagerOpen] = useState(false);
   const [printBarcode, setPrintBarcode] = useState(null);
+
 
   const handleTransferToPos = ({ voucherCode, voucherValue, customer, targetPhoneUnit }) => {
     setPosTransferData({
@@ -274,6 +279,11 @@ export default function App() {
               />
             )}
 
+            {activeTab === 'customers' && (
+              <CustomerCrmHub />
+            )}
+
+
             {activeTab === 'upgrade' && (
               <UpgradeProgram
                 products={products}
@@ -299,20 +309,27 @@ export default function App() {
                 phoneUnits={phoneUnits}
                 loading={loading}
                 onOpenBulkImport={() => setIsAddPhoneOpen(true)}
+                onOpenCatBrandManager={() => setIsCatBrandManagerOpen(true)}
                 onPrintBarcode={(code) => setPrintBarcode(code)}
+                onRefresh={fetchAllData}
               />
             )}
 
             {activeTab === 'accessories' && (
               <AccessoriesTab
                 products={products}
+                categories={categories}
+                brands={brands}
                 loading={loading}
+                onOpenAddAccessory={() => setIsAddAccessoryOpen(true)}
+                onOpenCatBrandManager={() => setIsCatBrandManagerOpen(true)}
                 onPrintBarcode={(code) => setPrintBarcode(code)}
+                onRefresh={fetchAllData}
               />
             )}
 
             {activeTab === 'compatibility' && (
-              <CompatibilityFinder phoneModels={phoneModels} />
+              <CompatibilityFinder phoneModels={phoneModels} products={products} />
             )}
           </div>
         </main>
@@ -342,6 +359,16 @@ export default function App() {
         />
       )}
 
+      {isCatBrandManagerOpen && (
+        <CategoryBrandManagerModal
+          categories={categories}
+          brands={brands}
+          phoneModels={phoneModels}
+          onClose={() => setIsCatBrandManagerOpen(false)}
+          onSuccess={fetchAllData}
+        />
+      )}
+
       {printBarcode && (
         <BarcodePrinterModal
           code={printBarcode}
@@ -349,5 +376,6 @@ export default function App() {
         />
       )}
     </div>
+
   );
 }

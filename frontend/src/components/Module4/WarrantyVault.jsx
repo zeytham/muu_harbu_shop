@@ -208,9 +208,6 @@ export default function WarrantyVault() {
           <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
             Digital Warranty Certificates & Supplier Factory Guarantee Swaps
           </h2>
-          <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-            Automated POS warranty issuance engine and Supplier RMA replacement manager. Store strictly sells 100% Brand New Sealed phones — factory defective units under warranty are returned directly to official brand suppliers for brand-new replacement swaps.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

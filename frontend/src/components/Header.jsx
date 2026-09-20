@@ -82,13 +82,29 @@ export default function Header({
         return 'AI Restock Predictor & Supplier Hub';
       case 'settings':
         return 'Store Settings & Security Controls';
+      case 'customers':
+        return 'Customer Directory CRM & SMS Communication Hub';
       default:
         return storeSettings?.shopName || 'PhoneVault Pro Management';
     }
   };
 
-  const handleExportBackup = () => {
-    window.open('/api/settings/export-backup', '_blank');
+  const handleExportBackup = async () => {
+    try {
+      const res = await fetch('/api/settings/export-backup');
+      if (!res.ok) throw new Error('Failed to export backup');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `PhoneVault_Database_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Imeshindikana kupakua Database Backup: ' + e.message);
+    }
   };
 
   return (

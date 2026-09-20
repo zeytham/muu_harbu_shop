@@ -210,3 +210,15 @@ export const getLowStockAlerts = async (req, res) => {
     res.status(500).json({ error: true, message: error.message });
   }
 };
+
+// Delete Product
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({ where: { id } });
+    res.json({ success: true, message: 'Product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+

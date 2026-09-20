@@ -16,12 +16,14 @@ import {
   Layers,
   ArrowRight,
   PieChart,
+  ShoppingCart,
+  DollarSign
 } from 'lucide-react';
 import CreatePOModal from './CreatePOModal';
 import CreateSupplierModal from './CreateSupplierModal';
 
 export default function RestockAndSupplierHub({ products = [], onRefresh }) {
-  const [activeTab, setActiveTab] = useState('velocity'); // velocity, pos, abc
+  const [activeTab, setActiveTab] = useState('velocity'); // velocity, pos, suppliers, abc
 
   // Data states
   const [velocityData, setVelocityData] = useState([]);
@@ -34,8 +36,6 @@ export default function RestockAndSupplierHub({ products = [], onRefresh }) {
   const [isCreatePoOpen, setIsCreatePoOpen] = useState(false);
   const [isCreateSupplierOpen, setIsCreateSupplierOpen] = useState(false);
   const [printPo, setPrintPo] = useState(null);
-  const [restockPoId, setRestockPoId] = useState(null);
-  const [restockImeis, setRestockImeis] = useState({});
 
   const fetchModuleData = async () => {
     setLoading(true);
@@ -68,7 +68,7 @@ export default function RestockAndSupplierHub({ products = [], onRefresh }) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          newPhoneUnits: [], // Handled by backend for non-phones, or auto-created
+          newPhoneUnits: [],
         }),
       });
 
@@ -87,444 +87,359 @@ export default function RestockAndSupplierHub({ products = [], onRefresh }) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner Header */}
-      <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-sky-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-sky-800/40">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#80ddff]/20 text-[#80ddff] text-xs font-black tracking-wider uppercase border border-[#80ddff]/30">
-              <TrendingUp className="w-3.5 h-3.5" /> MODULE 6 • SMART AI FORECASTING & SUPPLIER HUB
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              AI Sales Velocity & Supplier Restock Engine
-            </h1>
-            <p className="text-xs sm:text-sm text-sky-200 font-medium max-w-2xl">
-              Piga hesabu ya kasi ya mauzo ya kila siku (Daily Velocity), zuia stock kuisha, na tengeneza Risiti Rasmi za Agizo la Mzigo (PO) moja kwa moja kwa Official Suppliers.
-            </p>
+    <div className="space-y-4 sm:space-y-6 pb-12 w-full max-w-full overflow-hidden">
+      {/* Top Banner Header - Clean System Style */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-sky-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#80ddff]/30 text-sky-950 border border-sky-300 text-xs font-extrabold">
+            <TrendingUp className="w-4 h-4 text-sky-700 shrink-0" />
+            Module 6 Executive Supplier Hub
           </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setIsCreatePoOpen(true)}
-              className="px-5 py-3 rounded-2xl bg-[#0284c7] hover:bg-sky-500 text-white font-black text-xs transition-all shadow-lg shadow-sky-600/40 flex items-center gap-2 border border-sky-400/30"
-            >
-              <Plus className="w-4 h-4" /> Tengeneza PO Mpya
-            </button>
-            <button
-              onClick={fetchModuleData}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-sky-200 hover:text-white transition-all border border-white/10"
-              title="Refresh Analytics"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
+            Sales Velocity & Supplier Restock Engine
+          </h2>
         </div>
 
-        {/* Sub Navigation Bar */}
-        <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-1 border-t border-sky-800/60 pt-4">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
-            onClick={() => setActiveTab('velocity')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'velocity'
-                ? 'bg-white text-slate-950 shadow-md font-bold'
-                : 'text-sky-200 hover:bg-white/10'
-            }`}
+            onClick={() => setIsCreateSupplierOpen(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold transition flex items-center gap-1.5"
           >
-            <TrendingUp className="w-4 h-4 text-sky-700" /> 🧠 AI Restock Predictor
+            <Building2 className="w-4 h-4 text-purple-700" /> + Add Supplier
           </button>
           <button
-            onClick={() => setActiveTab('pos')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'pos'
-                ? 'bg-white text-slate-950 shadow-md font-bold'
-                : 'text-sky-200 hover:bg-white/10'
-            }`}
+            onClick={() => setIsCreatePoOpen(true)}
+            className="sky-btn-main px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md"
           >
-            <Truck className="w-4 h-4 text-purple-700" /> 📋 Supplier PO Manager ({purchaseOrders.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('abc')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'abc'
-                ? 'bg-white text-slate-950 shadow-md font-bold'
-                : 'text-sky-200 hover:bg-white/10'
-            }`}
-          >
-            <PieChart className="w-4 h-4 text-amber-600" /> 📊 ABC Matrix & Dead Stock
+            <Plus className="w-4 h-4" /> Tengeneza PO Mpya
           </button>
         </div>
       </div>
 
-      {/* SUB-TAB 1: AI RESTOCK PREDICTOR & SALES VELOCITY */}
+      {/* Touch-Scrollable Sub-Tab Switcher */}
+      <div className="flex bg-white p-1.5 rounded-2xl border border-sky-200 space-x-1.5 shadow-sm overflow-x-auto min-w-full">
+        <button
+          onClick={() => setActiveTab('velocity')}
+          className={`shrink-0 min-w-[170px] sm:min-w-[200px] py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'velocity'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
+              : 'text-slate-700 hover:bg-sky-50'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 shrink-0" />
+          <span>AI Restock Predictor</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('pos')}
+          className={`shrink-0 min-w-[180px] sm:min-w-[220px] py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'pos'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
+              : 'text-slate-700 hover:bg-sky-50'
+          }`}
+        >
+          <Truck className="w-4 h-4 shrink-0" />
+          <span>Supplier PO Tracker ({purchaseOrders.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('suppliers')}
+          className={`shrink-0 min-w-[160px] sm:min-w-[190px] py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'suppliers'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
+              : 'text-slate-700 hover:bg-sky-50'
+          }`}
+        >
+          <Building2 className="w-4 h-4 shrink-0" />
+          <span>Suppliers ({suppliers.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('abc')}
+          className={`shrink-0 min-w-[170px] sm:min-w-[200px] py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'abc'
+              ? 'bg-[#0284c7] text-white shadow-md shadow-sky-600/30'
+              : 'text-slate-700 hover:bg-sky-50'
+          }`}
+        >
+          <PieChart className="w-4 h-4 shrink-0" />
+          <span>ABC Dead-Stock Matrix</span>
+        </button>
+      </div>
+
+      {/* TAB 1: AI RESTOCK PREDICTOR & SALES VELOCITY */}
       {activeTab === 'velocity' && (
-        <div className="space-y-6">
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 flex items-center justify-center font-black shrink-0">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-2xl font-black text-rose-700">
-                  {velocityData.filter((v) => v.status === 'CRITICAL_STOCKOUT_RISK').length}
-                </div>
-                <div className="text-xs text-slate-600 font-bold">Critical Stockout Risk (&le; 7 Days)</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center font-black shrink-0">
-                <Clock className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-2xl font-black text-amber-700">
-                  {velocityData.filter((v) => v.status === 'REORDER_NEEDED').length}
-                </div>
-                <div className="text-xs text-slate-600 font-bold">Reorder Needed (&le; 14 Days)</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center font-black shrink-0">
-                <CheckCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-2xl font-black text-emerald-700">
-                  {velocityData.filter((v) => v.status === 'HEALTHY').length}
-                </div>
-                <div className="text-xs text-slate-600 font-bold">Healthy Stock Coverage</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Velocity List */}
-          <div className="bg-white rounded-3xl border border-sky-200/80 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-sky-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                  Uchambuzi wa Kasi ya Mauzo ya Siku 30 (30-Day Velocity Analysis)
-                </h3>
-                <p className="text-xs text-slate-600 font-medium">
-                  Matokeo yanakokotoa Daily Velocity Rate (DVR) na kubaini siku ambazo mzigo utamalizika.
-                </p>
-              </div>
-            </div>
-
-            {/* Mobile Touch Cards View */}
-            <div className="block md:hidden divide-y divide-sky-100">
-              {velocityData.map((item) => (
-                <div key={item.id} className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="text-xs font-black text-slate-900">{item.name}</div>
-                      <div className="text-[11px] text-slate-600 font-medium">{item.brand} • {item.category}</div>
-                    </div>
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${
-                        item.status === 'CRITICAL_STOCKOUT_RISK'
-                          ? 'bg-rose-100 text-rose-800 border-rose-300'
-                          : item.status === 'REORDER_NEEDED'
-                          ? 'bg-amber-100 text-amber-800 border-amber-300'
-                          : 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                      }`}
-                    >
-                      {item.status === 'CRITICAL_STOCKOUT_RISK' ? 'Critical Risk' : item.status === 'REORDER_NEEDED' ? 'Reorder Needed' : 'Healthy'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-sky-50/50 p-2.5 rounded-xl border border-sky-100">
-                    <div>
-                      <span className="text-slate-600 font-bold block">Stock Iliyopo:</span>
-                      <span className="font-extrabold text-slate-900">{item.currentStock} Units</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-600 font-bold block">DVR (Units/Siku):</span>
-                      <span className="font-extrabold text-sky-800">{item.dailyVelocityRate} / Siku</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-600 font-bold block">Siku Zilizobaki:</span>
-                      <span className="font-extrabold text-indigo-700">{item.daysRemaining === 999 ? '∞ Siku' : `${item.daysRemaining} Siku`}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-600 font-bold block">Recommended Order:</span>
-                      <span className="font-extrabold text-emerald-700">+{item.recommendedReorder} Pcs</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-sky-50/70 text-slate-700 font-extrabold border-b border-sky-100">
-                    <th className="p-3.5 pl-6">Bidhaa / Model Name</th>
-                    <th className="p-3.5">Category & Brand</th>
-                    <th className="p-3.5 text-center">Stock Iliyopo</th>
-                    <th className="p-3.5 text-center">Velocity (DVR/Siku)</th>
-                    <th className="p-3.5 text-center">Siku Zilizobaki (DIR)</th>
-                    <th className="p-3.5 text-center">Hali (Status)</th>
-                    <th className="p-3.5 text-right pr-6">Reorder Qty</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-sky-100 font-medium">
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-sky-200 overflow-hidden shadow-sm p-4 sm:p-0">
+            {loading ? (
+              <div className="p-12 text-center text-slate-500 text-xs">Loading AI velocity predictions...</div>
+            ) : velocityData.length === 0 ? (
+              <div className="p-12 text-center text-slate-500 text-xs">No restock predictions generated.</div>
+            ) : (
+              <>
+                {/* Mobile Responsive Cards (Visible on Small Screens) */}
+                <div className="block md:hidden space-y-3">
                   {velocityData.map((item) => (
-                    <tr key={item.id} className="hover:bg-sky-50/40 transition-colors">
-                      <td className="p-3.5 pl-6 font-extrabold text-slate-900">{item.name}</td>
-                      <td className="p-3.5 text-slate-600">{item.brand} • {item.category}</td>
-                      <td className="p-3.5 text-center font-bold">{item.currentStock} Units</td>
-                      <td className="p-3.5 text-center font-extrabold text-sky-800">{item.dailyVelocityRate} / Siku</td>
-                      <td className="p-3.5 text-center font-extrabold text-indigo-700">
-                        {item.daysRemaining === 999 ? '∞ Siku' : `${item.daysRemaining} Siku`}
-                      </td>
-                      <td className="p-3.5 text-center">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${
-                            item.status === 'CRITICAL_STOCKOUT_RISK'
-                              ? 'bg-rose-100 text-rose-800 border-rose-300'
-                              : item.status === 'REORDER_NEEDED'
-                              ? 'bg-amber-100 text-amber-800 border-amber-300'
-                              : 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                          }`}
-                        >
-                          {item.status === 'CRITICAL_STOCKOUT_RISK' ? 'Critical Risk' : item.status === 'REORDER_NEEDED' ? 'Reorder Needed' : 'Healthy'}
+                    <div key={item.id} className="bg-sky-50/70 p-4 rounded-xl border border-sky-200 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm">{item.name}</h4>
+                          <p className="text-[11px] text-sky-700 font-bold">{item.brand} • {item.category}</p>
+                        </div>
+                        <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-full ${
+                          item.status === 'CRITICAL_STOCKOUT_RISK'
+                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                            : item.status === 'REORDER_NEEDED'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        }`}>
+                          {item.status === 'CRITICAL_STOCKOUT_RISK' ? 'CRITICAL' : item.status}
                         </span>
-                      </td>
-                      <td className="p-3.5 text-right pr-6 font-black text-emerald-700">+{item.recommendedReorder} Pcs</td>
-                    </tr>
+                      </div>
+
+                      <div className="pt-2 border-t border-sky-200/80 text-xs grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] text-slate-500 block font-semibold">Current Stock</span>
+                          <span className="font-extrabold text-slate-900">{item.currentStock} units</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-500 block font-semibold">Days Remaining (DIR)</span>
+                          <span className="font-extrabold text-sky-900">{item.daysRemaining} days</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-sky-200/80 flex items-center justify-between text-xs">
+                        <span className="text-slate-600 font-semibold">Suggested Reorder: <strong>{item.recommendedReorder} units</strong></span>
+                        <button
+                          onClick={() => setIsCreatePoOpen(true)}
+                          className="px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold text-[11px] hover:bg-sky-700"
+                        >
+                          + Agiza PO
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </div>
+
+                {/* Desktop Data Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-sky-50 text-slate-700 font-extrabold border-b border-sky-200">
+                      <tr>
+                        <th className="p-4">Item Name</th>
+                        <th className="p-4">Brand & Category</th>
+                        <th className="p-4">Current Stock</th>
+                        <th className="p-4">Daily Velocity</th>
+                        <th className="p-4">Days Remaining (DIR)</th>
+                        <th className="p-4">Stock Status</th>
+                        <th className="p-4 text-right">Suggested Reorder</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-sky-100">
+                      {velocityData.map((item) => (
+                        <tr key={item.id} className="hover:bg-sky-50/60 transition-all">
+                          <td className="p-4 font-extrabold text-slate-900">{item.name}</td>
+                          <td className="p-4 text-sky-800 font-bold">{item.brand} ({item.category})</td>
+                          <td className="p-4 font-bold">{item.currentStock} units</td>
+                          <td className="p-4 font-semibold">{item.dailyVelocityRate} / day</td>
+                          <td className="p-4 font-extrabold text-sky-900">{item.daysRemaining} days</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 text-[10px] font-extrabold rounded-full ${
+                              item.status === 'CRITICAL_STOCKOUT_RISK'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : item.status === 'REORDER_NEEDED'
+                                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            }`}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => setIsCreatePoOpen(true)}
+                              className="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 border border-sky-300 text-[11px] font-bold"
+                            >
+                              + Reorder {item.recommendedReorder} units
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* SUB-TAB 2: SUPPLIER PO MANAGER & DIRECTORY */}
+      {/* TAB 2: SUPPLIER PO TRACKER */}
       {activeTab === 'pos' && (
-        <div className="space-y-6">
-          {/* Supplier Directory Cards */}
-          <div className="bg-white rounded-3xl border border-sky-200/80 p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-sky-700" /> Ma-Supplier Rasmi (Official Supplier Directory)
-                </h3>
-                <p className="text-xs text-slate-600 font-medium">
-                  Orodha ya Ma-Distributor rasmi wa Apple, Samsung, Anker na Baseus.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsCreateSupplierOpen(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 font-extrabold text-xs flex items-center gap-1.5 shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5 text-purple-700" /> Sajili Supplier Mpya
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {suppliers.map((s) => (
-                <div key={s.id} className="bg-sky-50/50 rounded-2xl p-4 border border-sky-200 space-y-2">
-                  <div className="text-xs font-black text-slate-900 truncate">{s.name}</div>
-                  <div className="text-[11px] text-sky-800 font-bold">{s.contactPerson} • {s.phone}</div>
-                  <div className="text-[10px] text-slate-600">{s.email}</div>
-                  <div className="pt-2 flex items-center justify-between text-[10px] border-t border-sky-200">
-                    <span className="font-bold text-slate-700">Lead Time: {s.leadTimeDays} Siku</span>
-                    <span className="font-black text-purple-800 px-1.5 py-0.5 bg-purple-100 rounded">{s.paymentTerms}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Purchase Orders Tracker */}
-          <div className="bg-white rounded-3xl border border-sky-200/80 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-sky-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-purple-700" /> Orodha ya Purchase Orders (PO Tracker)
-                </h3>
-                <p className="text-xs text-slate-600 font-medium">
-                  Fuatilia maagizo ya mzigo na uingize stock dukani ukishawasili.
-                </p>
-              </div>
-            </div>
-
-            <div className="divide-y divide-sky-100">
-              {purchaseOrders.length === 0 ? (
-                <div className="p-8 text-center text-slate-500 font-medium text-xs">
-                  Bado hujatengeneza Purchase Order yoyote. Bonyeza "Tengeneza PO Mpya" hapo juu.
-                </div>
-              ) : (
-                purchaseOrders.map((po) => (
-                  <div key={po.id} className="p-5 space-y-3 hover:bg-sky-50/30 transition-all">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-sky-900">{po.poNumber}</span>
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${
-                              po.status === 'DELIVERED_AND_RESTOCKED'
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                : 'bg-amber-100 text-amber-800 border-amber-300'
-                            }`}
-                          >
-                            {po.status === 'DELIVERED_AND_RESTOCKED' ? 'Delivered & Restocked' : 'In Transit / Sent'}
-                          </span>
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-sky-200 overflow-hidden shadow-sm p-4 sm:p-0">
+            {loading ? (
+              <div className="p-12 text-center text-slate-500 text-xs">Loading purchase orders...</div>
+            ) : purchaseOrders.length === 0 ? (
+              <div className="p-12 text-center text-slate-500 text-xs">No purchase orders logged yet.</div>
+            ) : (
+              <>
+                {/* Mobile Cards for Purchase Orders */}
+                <div className="block md:hidden space-y-3">
+                  {purchaseOrders.map((po) => (
+                    <div key={po.id} className="bg-sky-50/70 p-4 rounded-xl border border-sky-200 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-extrabold text-slate-900 text-sm font-mono">{po.poNumber}</h4>
+                          <p className="text-[11px] text-sky-700 font-bold">{po.supplier?.name}</p>
                         </div>
-                        <div className="text-xs text-slate-600 font-bold mt-1">
-                          Supplier: <span className="text-slate-900">{po.supplier?.name}</span> • Tar: {new Date(po.createdAt).toLocaleDateString()}
-                        </div>
+                        <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-full ${
+                          po.status === 'DELIVERED_AND_RESTOCKED'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-amber-100 text-amber-800 border border-amber-300'
+                        }`}>
+                          {po.status}
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <div className="text-xs text-slate-500 font-bold">Jumla Kuu (FOB)</div>
-                          <div className="text-sm font-black text-slate-900">TSH {po.totalAmount.toLocaleString()}</div>
-                        </div>
+                      <div className="pt-2 border-t border-sky-200/80 text-xs flex justify-between">
+                        <span className="text-slate-600">Total Amount:</span>
+                        <span className="font-black text-slate-900">TSH {po.totalAmount?.toLocaleString()}</span>
+                      </div>
 
+                      <div className="pt-2 border-t border-sky-200/80 flex items-center justify-between text-xs">
+                        <button
+                          onClick={() => setPrintPo(po)}
+                          className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 font-bold text-[11px]"
+                        >
+                          Print PO PDF
+                        </button>
                         {po.status !== 'DELIVERED_AND_RESTOCKED' && (
                           <button
                             onClick={() => handleReceiveRestock(po.id)}
-                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5"
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-[11px] hover:bg-emerald-700"
                           >
-                            <PackageCheck className="w-4 h-4" /> Receive & Restock
+                            Receive & Restock
                           </button>
                         )}
                       </div>
                     </div>
-
-                    {/* PO Items List */}
-                    <div className="bg-sky-50/50 p-3 rounded-2xl border border-sky-100 flex flex-wrap gap-2 text-xs">
-                      {po.items?.map((item) => (
-                        <span key={item.id} className="bg-white px-3 py-1.5 rounded-xl border border-sky-200 font-bold text-slate-800">
-                          {item.product?.name}: <span className="text-sky-900 font-black">{item.quantityOrdered} Pcs</span> @ TSH {item.unitCost.toLocaleString()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUB-TAB 3: FAST-MOVING VS DEAD-STOCK ABC MATRIX */}
-      {activeTab === 'abc' && abcData && (
-        <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center font-black shrink-0">
-                A
-              </div>
-              <div>
-                <div className="text-2xl font-black text-slate-900">{abcData.summary.classACount}</div>
-                <div className="text-xs text-slate-600 font-bold">Class A (Top Revenue Movers)</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-sky-100 text-sky-800 border border-sky-300 flex items-center justify-center font-black shrink-0">
-                B
-              </div>
-              <div>
-                <div className="text-2xl font-black text-slate-900">{abcData.summary.classBCount}</div>
-                <div className="text-xs text-slate-600 font-bold">Class B (Steady Movers)</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center font-black shrink-0">
-                C
-              </div>
-              <div>
-                <div className="text-2xl font-black text-slate-900">{abcData.summary.classCCount}</div>
-                <div className="text-xs text-slate-600 font-bold">Class C (Slow Movers)</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 border border-sky-200 flex items-center gap-4 shadow-sm">
-              <div className="h-12 w-12 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 flex items-center justify-center font-black shrink-0">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-lg font-black text-rose-700">
-                  TSH {abcData.summary.deadStockCapitalTiedUp.toLocaleString()}
-                </div>
-                <div className="text-xs text-slate-600 font-bold">Dead Stock Capital (&gt;45 Days)</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Matrix Table */}
-          <div className="bg-white rounded-3xl border border-sky-200/80 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-sky-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                  Mchanganuo wa ABC Inventory Matrix & Dead Stock
-                </h3>
-                <p className="text-xs text-slate-600 font-medium">
-                  Inapanga bidhaa kwa uwiano wa mapato na kubaini mtaji uliokwama.
-                </p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-sky-50/70 text-slate-700 font-extrabold border-b border-sky-100">
-                    <th className="p-3.5 pl-6">Class</th>
-                    <th className="p-3.5">Bidhaa / Model</th>
-                    <th className="p-3.5 text-right">Revenue (TSH)</th>
-                    <th className="p-3.5 text-center">Stock Iliyopo</th>
-                    <th className="p-3.5 text-right">Capital Tied Up</th>
-                    <th className="p-3.5 text-center pr-6">Hali ya Dead Stock</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-sky-100 font-medium">
-                  {abcData.data.map((item) => (
-                    <tr key={item.id} className="hover:bg-sky-50/40 transition-colors">
-                      <td className="p-3.5 pl-6">
-                        <span
-                          className={`h-7 w-7 rounded-xl flex items-center justify-center font-black text-xs ${
-                            item.abcClass === 'A'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                              : item.abcClass === 'B'
-                              ? 'bg-sky-100 text-sky-800 border border-sky-300'
-                              : 'bg-amber-100 text-amber-800 border border-amber-300'
-                          }`}
-                        >
-                          {item.abcClass}
-                        </span>
-                      </td>
-                      <td className="p-3.5 font-extrabold text-slate-900">{item.name}</td>
-                      <td className="p-3.5 text-right font-black text-sky-900">TSH {item.revenue.toLocaleString()}</td>
-                      <td className="p-3.5 text-center font-bold">{item.currentStock} Units</td>
-                      <td className="p-3.5 text-right font-extrabold text-slate-800">TSH {item.tiedUpCapital.toLocaleString()}</td>
-                      <td className="p-3.5 text-center pr-6">
-                        {item.isDeadStock ? (
-                          <span className="px-2.5 py-1 bg-rose-100 text-rose-800 rounded-full font-black text-[10px] border border-rose-300">
-                            Dead Stock (&gt;45 Days)
-                          </span>
-                        ) : (
-                          <span className="text-emerald-700 font-bold text-[11px]">Active</span>
-                        )}
-                      </td>
-                    </tr>
                   ))}
-                </tbody>
-              </table>
+                </div>
+
+                {/* Desktop Table for POs */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-sky-50 text-slate-700 font-extrabold border-b border-sky-200">
+                      <tr>
+                        <th className="p-4">PO Number</th>
+                        <th className="p-4">Supplier</th>
+                        <th className="p-4">Items Count</th>
+                        <th className="p-4">Total Amount</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-sky-100">
+                      {purchaseOrders.map((po) => (
+                        <tr key={po.id} className="hover:bg-sky-50/60 transition-all">
+                          <td className="p-4 font-mono font-extrabold text-sky-900">{po.poNumber}</td>
+                          <td className="p-4 font-bold text-slate-900">{po.supplier?.name}</td>
+                          <td className="p-4 font-semibold">{po.items?.length || 0} items</td>
+                          <td className="p-4 font-black text-slate-900">TSH {po.totalAmount?.toLocaleString()}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 text-[10px] font-extrabold rounded-full ${
+                              po.status === 'DELIVERED_AND_RESTOCKED'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}>
+                              {po.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right space-x-2">
+                            <button
+                              onClick={() => setPrintPo(po)}
+                              className="px-3 py-1.5 rounded-xl bg-sky-50 text-slate-800 border border-sky-200 text-[11px] font-bold"
+                            >
+                              Print PO
+                            </button>
+                            {po.status !== 'DELIVERED_AND_RESTOCKED' && (
+                              <button
+                                onClick={() => handleReceiveRestock(po.id)}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-[11px] hover:bg-emerald-700"
+                              >
+                                Receive & Auto-Restock
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: SUPPLIERS DIRECTORY */}
+      {activeTab === 'suppliers' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {suppliers.map((sup) => (
+              <div key={sup.id} className="bg-white p-5 rounded-2xl border border-sky-200 shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 text-base">{sup.name}</h3>
+                    <p className="text-xs text-sky-700 font-bold">Brand: {sup.brandSupplied || 'Multi-Brand'}</p>
+                  </div>
+                  <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md border border-sky-200">
+                    Lead: {sup.leadTimeDays} Days
+                  </span>
+                </div>
+
+                <div className="text-xs space-y-1 text-slate-600 pt-2 border-t border-sky-100">
+                  <div>Contact: <strong>{sup.contactPerson || 'Sales Desk'}</strong></div>
+                  <div>Phone: <strong className="font-mono text-slate-900">{sup.phone}</strong></div>
+                  <div>Payment Terms: <span className="font-bold text-amber-700">{sup.paymentTerms}</span></div>
+                </div>
+
+                <button
+                  onClick={() => setIsCreatePoOpen(true)}
+                  className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs transition shadow-sm"
+                >
+                  + Order Mzigo (Create PO)
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: ABC MATRIX & DEAD-STOCK DETECTOR */}
+      {activeTab === 'abc' && abcData && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-white p-4 rounded-2xl border border-sky-200 shadow-sm">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Fast Moving (Class A)</span>
+              <h3 className="text-2xl font-black text-emerald-700">{abcData.summary?.classACount} Items</h3>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-sky-200 shadow-sm">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Moderate (Class B)</span>
+              <h3 className="text-2xl font-black text-sky-700">{abcData.summary?.classBCount} Items</h3>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-sky-200 shadow-sm">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Dead Stock (&gt;45 Days)</span>
+              <h3 className="text-2xl font-black text-rose-700">{abcData.summary?.deadStockCount} Items</h3>
+              <p className="text-[10px] text-rose-600 font-bold mt-1">
+                Tied Capital: TSH {abcData.summary?.deadStockCapitalTiedUp?.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal: Create PO */}
+      {/* Modals */}
       {isCreatePoOpen && (
         <CreatePOModal
           suppliers={suppliers}
@@ -534,7 +449,6 @@ export default function RestockAndSupplierHub({ products = [], onRefresh }) {
         />
       )}
 
-      {/* Modal: Create Supplier */}
       {isCreateSupplierOpen && (
         <CreateSupplierModal
           onClose={() => setIsCreateSupplierOpen(false)}

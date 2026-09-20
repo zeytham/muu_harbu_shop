@@ -87,20 +87,17 @@ export default function CreatePOModal({ suppliers, products, onClose, onSuccess 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-sky-100 overflow-hidden">
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-sky-900 to-slate-900 text-white flex items-center justify-between shrink-0">
+        <div className="p-5 bg-sky-50 border-b border-sky-200 text-slate-900 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center font-bold">
-              <ShoppingBag className="w-5 h-5 text-sky-300" />
+            <div className="h-10 w-10 rounded-xl bg-[#80ddff]/30 text-sky-900 border border-sky-300 flex items-center justify-center font-bold">
+              <ShoppingBag className="w-5 h-5 text-sky-800" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold tracking-tight">Tengeneza Purchase Order Rasmi (PO)</h2>
-              <p className="text-xs text-sky-200 font-medium">Agiza Mzigo Mpya Kutoka Kwa Official Supplier</p>
+              <h2 className="text-base font-extrabold tracking-tight text-slate-900">Tengeneza Purchase Order Rasmi (PO)</h2>
+              <p className="text-xs text-slate-600 font-semibold">Agiza Mzigo Mpya Kutoka Kwa Official Supplier</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl hover:bg-white/10 text-sky-200 hover:text-white transition-all"
-          >
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-sky-100 text-slate-500 hover:text-slate-900">
             <X className="w-5 h-5" />
           </button>
         </div>

@@ -154,3 +154,37 @@ export const bulkImportPhoneUnits = async (req, res) => {
     res.status(500).json({ error: true, message: error.message });
   }
 };
+
+// Update Phone Unit Status
+export const updatePhoneUnitStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, condition, retailPrice } = req.body;
+
+    const data = {};
+    if (status) data.status = status;
+    if (condition) data.condition = condition;
+    if (retailPrice) data.retailPrice = parseFloat(retailPrice);
+
+    const updated = await prisma.phoneUnit.update({
+      where: { id },
+      data,
+    });
+
+    res.json({ success: true, message: 'Phone unit updated successfully', data: updated });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+// Delete Phone Unit
+export const deletePhoneUnit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.phoneUnit.delete({ where: { id } });
+    res.json({ success: true, message: 'Phone unit deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
